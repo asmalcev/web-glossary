@@ -3,6 +3,7 @@ const url = require('url');
 
 const downloadDictionary = require('./downloadDictionary');
 const loadDictionary = require('./loadDictionary');
+const fillTemplate = require('./fillTemplate');
 
 const dictionary = {
     current: null,
@@ -19,6 +20,14 @@ var dictionaryHandler = (request, response) => {
             response.writeHead(404);
             response.end('Not Loaded');
         }
+        return;
+    }
+
+    if (u.pathname == '/mindmap') {
+        response.writeHead(200, {
+            'Content-Type': 'text/html; charset=utf-8',
+        });
+        fillTemplate((html) => response.end(html));
         return;
     }
 

@@ -9,3 +9,5 @@
 ## MindMap
 Для построения mindmap используется библиотека [Mermaid](https://mermaid.js.org/syntax/mindmap.html).
 Полученный граф опубликован на GitHub Pages: https://asmalcev.github.io/web-glossary/
+
+А также mindmap доступна по адресу `/mindmap` после развертывания сервера / контейнера.
