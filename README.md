@@ -1,3 +1,11 @@
 # web-glossary
 
-A simple containerized node.js server that implements a dictionary API server.
+## Глоссарий
+Глоссарий представляет из себя JSON документ, в котором хранятся термины и их определения. Сам файл `dictionary.json` хранится в этом же репозитории, в ветке `dictionary`. В отдельном поле также хранится описание связей между терминами для построения mindmap.
+
+## API
+Серверная часть глоссария может быть запущена с помощью `node server.js`, если на устройстве установлена Node.js, а также можно воспользоваться возможностями контейнеризации и запустить сервер внутри Docker или Podman.
+
+## MindMap
+Для построения mindmap используется библиотека [Mermaid](https://mermaid.js.org/syntax/mindmap.html).
+Полученный граф опубликован на GitHub Pages: https://asmalcev.github.io/web-glossary/
