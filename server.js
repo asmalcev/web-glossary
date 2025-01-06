@@ -1,15 +1,18 @@
-var fs = require('fs');
-var http = require('http');
-var https = require('https');
-var url = require('url');
+const http = require('http');
+const url = require('url');
 
-var dictionary = null;
+const downloadDictionary = require('./downloadDictionary');
+const loadDictionary = require('./loadDictionary');
+
+const dictionary = {
+    current: null,
+};
 
 var dictionaryHandler = (request, response) => {
     var u = url.parse(request.url);
 
     if (u.pathname == '/readyz') {
-        if (dictionary) {
+        if (dictionary.current) {
             response.writeHead(200);
             response.end('OK');
         } else {
@@ -19,67 +22,46 @@ var dictionaryHandler = (request, response) => {
         return;
     }
 
-    var key = '';
+    let key = '';
     if (u.pathname.length > 0) {
-        key = u.pathname.substr(1).toUpperCase(); 
+        key = u.pathname.slice(1);
     }
-    var def = dictionary[key];
+    const def = dictionary.current[key];
     if (!def) {
         response.writeHead(404);
         response.end(key + ' was not found');
         return;
     }
-    response.writeHead(200);
-    response.end(def);
-}
-
-var downloadDictionary = (url, file, callback) => {
-  var stream = fs.createWriteStream(file);
-  var req = https.get(url, function(res) {
-    res.pipe(stream);
-    stream.on('finish', function() {
-      stream.close(callback);
-      console.log('dictionary downloaded');
+    response.writeHead(200, {
+        'Content-Type': 'application/json; charset=utf-8',
     });
-  }).on('error', function(err) {
-    fs.unlink(file);
-    if (callback) cb(err.message);
-  });
+    response.end(JSON.stringify(def));
 };
 
-var loadDictionary = (file, callback) => {
-    fs.readFile(file, (err, data) => {
+downloadDictionary(
+    'https://raw.githubusercontent.com/asmalcev/web-glossary/refs/heads/dictionary/dictionary.json',
+    'dictionary.json',
+    (err) => {
         if (err) {
             console.log(err);
-            callback(err);
             return;
         }
-        dictionary = JSON.parse(data);
-        console.log('dictionary loaded.');
-        callback();
-    })
-};
-
-downloadDictionary('https://raw.githubusercontent.com/adambom/dictionary/master/dictionary.json', 'dictionary.json', (err) => {
-    if (err) {
-        console.log(err);
-        return;
+        loadDictionary('dictionary.json', dictionary, (err) => {
+            if (err) {
+                console.log(err);
+                return;
+            }
+            console.log('ready to serve');
+        });
     }
-    loadDictionary('dictionary.json', (err) => {
-        if (err) {
-            console.log(err);
-            return;
-        }
-        console.log('ready to serve');
-    });
-});
+);
 
 const server = http.createServer(dictionaryHandler);
 
-server.listen(8080, (err) => {  
-  if (err) {
-    return console.log('error starting server: ' + err);
-  }
+server.listen(8080, (err) => {
+    if (err) {
+        return console.log('error starting server: ' + err);
+    }
 
-  console.log('server is listening on 8080');
+    console.log('server is listening on 8080');
 });
